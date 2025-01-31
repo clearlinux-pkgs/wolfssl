@@ -9,7 +9,7 @@
 #
 Name     : wolfssl
 Version  : 5.7.6.stable
-Release  : 2
+Release  : 3
 URL      : https://github.com/wolfSSL/wolfssl/archive/v5.7.6-stable/wolfssl-5.7.6-stable.tar.gz
 Source0  : https://github.com/wolfSSL/wolfssl/archive/v5.7.6-stable/wolfssl-5.7.6-stable.tar.gz
 Source1  : https://github.com/wolfSSL/wolfssl/archive/v5.7.6-stable/wolfssl-5.7.6-stable.tar.gz.asc
@@ -17,8 +17,8 @@ Source2  : EBC80E415CA29677.pkey
 Summary  : wolfssl C library.
 Group    : Development/Tools
 License  : GPL-2.0
+Requires: wolfssl-lib = %{version}-%{release}
 Requires: wolfssl-license = %{version}-%{release}
-Requires: wolfssl-plugins = %{version}-%{release}
 BuildRequires : buildreq-cmake
 BuildRequires : glibc-dev
 BuildRequires : gnupg
@@ -41,6 +41,7 @@ reports dramatically better performance when using wolfSSL over OpenSSL.
 %package dev
 Summary: dev components for the wolfssl package.
 Group: Development
+Requires: wolfssl-lib = %{version}-%{release}
 Provides: wolfssl-devel = %{version}-%{release}
 Requires: wolfssl = %{version}-%{release}
 
@@ -56,20 +57,21 @@ Group: Documentation
 doc components for the wolfssl package.
 
 
+%package lib
+Summary: lib components for the wolfssl package.
+Group: Libraries
+Requires: wolfssl-license = %{version}-%{release}
+
+%description lib
+lib components for the wolfssl package.
+
+
 %package license
 Summary: license components for the wolfssl package.
 Group: Default
 
 %description license
 license components for the wolfssl package.
-
-
-%package plugins
-Summary: plugins components for the wolfssl package.
-Group: Default
-
-%description plugins
-plugins components for the wolfssl package.
 
 
 %prep
@@ -86,7 +88,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1738351032
+export SOURCE_DATE_EPOCH=1738352634
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -130,7 +132,7 @@ FFLAGS="$CLEAR_INTERMEDIATE_FFLAGS"
 FCFLAGS="$CLEAR_INTERMEDIATE_FCFLAGS"
 ASFLAGS="$CLEAR_INTERMEDIATE_ASFLAGS"
 LDFLAGS="$CLEAR_INTERMEDIATE_LDFLAGS"
-export SOURCE_DATE_EPOCH=1738351032
+export SOURCE_DATE_EPOCH=1738352634
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/wolfssl
 cp %{_builddir}/wolfssl-5.7.6-stable/COPYING %{buildroot}/usr/share/package-licenses/wolfssl/4cc77b90af91e615a64ae04893fdffa7939db84c || :
@@ -139,6 +141,11 @@ GOAMD64=v2
 pushd clr-build
 %make_install
 popd
+## install_append content
+# /usr/lib -> /usr/lib64
+mkdir -p %{buildroot}/usr/lib64
+mv %{buildroot}/usr/lib/* %{buildroot}/usr/lib64/
+## install_append end
 
 %files
 %defattr(-,root,root,-)
@@ -313,22 +320,22 @@ popd
 /usr/include/wolfssl/wolfcrypt/wolfmath.h
 /usr/include/wolfssl/wolfcrypt/xmss.h
 /usr/include/wolfssl/wolfio.h
-/usr/lib/libwolfssl.so
 /usr/lib64/cmake/wolfssl/wolfssl-config-version.cmake
 /usr/lib64/cmake/wolfssl/wolfssl-config.cmake
 /usr/lib64/cmake/wolfssl/wolfssl-targets-relwithdebinfo.cmake
 /usr/lib64/cmake/wolfssl/wolfssl-targets.cmake
+/usr/lib64/libwolfssl.so
 /usr/lib64/pkgconfig/wolfssl.pc
 
 %files doc
 %defattr(0644,root,root,0755)
 /usr/share/doc/wolfssl/*
 
+%files lib
+%defattr(-,root,root,-)
+/usr/lib64/libwolfssl.so.43
+/usr/lib64/libwolfssl.so.43.0.0
+
 %files license
 %defattr(0644,root,root,0755)
 /usr/share/package-licenses/wolfssl/4cc77b90af91e615a64ae04893fdffa7939db84c
-
-%files plugins
-%defattr(-,root,root,-)
-/usr/lib/libwolfssl.so.43
-/usr/lib/libwolfssl.so.43.0.0
